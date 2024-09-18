@@ -22,15 +22,15 @@ To apply one of the plugins, add the plugin's id into the plugins block in the b
 
 `spm-gradle`
 ```kotlin
-plugins {
-	id("io.scade.gradle.plugins.swiftpm") version "1.0.0"
+plugins { 
+    id("io.scade.gradle.plugins.swiftpm") version "1.0.0"
 }
 ```
 
 `spm-gradle-android`
 ```kotlin
 plugins {
-	id("io.scade.gradle.plugins.android.swiftpm") version "1.0.0"
+    id("io.scade.gradle.plugins.android.swiftpm") version "1.0.0"
 }
 ```
 
@@ -40,10 +40,10 @@ For both plugins add the following configuration section to the build file `buil
 
 ```kotlin
 swiftpm { 
-	// Path to the folder containing Package.swift
-	path = file("<PACKAGE LOCATION>")
-	// Name of the package's product 
-	product = "<PRODUCT NAME>"
+    // Path to the folder containing Package.swift
+    path = file("<PACKAGE LOCATION>")
+    // Name of the package's product 
+    product = "<PRODUCT NAME>"
 }
 ```
 
