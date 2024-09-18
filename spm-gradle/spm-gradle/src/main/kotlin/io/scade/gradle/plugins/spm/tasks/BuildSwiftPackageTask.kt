@@ -1,4 +1,4 @@
-package com.scade.gradle.plugins.spm.tasks
+package io.scade.gradle.plugins.spm.tasks
 
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem;

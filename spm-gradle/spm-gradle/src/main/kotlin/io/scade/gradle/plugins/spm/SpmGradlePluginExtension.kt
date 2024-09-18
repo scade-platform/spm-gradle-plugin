@@ -1,4 +1,4 @@
-package com.scade.gradle.plugins.spm
+package io.scade.gradle.plugins.spm
 
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ListProperty

@@ -6,4 +6,4 @@
  */
 
 rootProject.name = "spm-gradle"
-include("plugin")
+include("spm-gradle")

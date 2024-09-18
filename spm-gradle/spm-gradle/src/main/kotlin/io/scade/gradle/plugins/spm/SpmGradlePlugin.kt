@@ -1,9 +1,9 @@
-package com.scade.gradle.plugins.spm
+package io.scade.gradle.plugins.spm
 
-import com.scade.gradle.plugins.spm.tasks.AssembleSwiftPackageTask
-import com.scade.gradle.plugins.spm.tasks.BuildSwiftPackageTask
-import com.scade.gradle.plugins.spm.tasks.GenerateBridgingTask
-import com.scade.gradle.plugins.spm.tasks.ResolveScdToolTask
+import io.scade.gradle.plugins.spm.tasks.AssembleSwiftPackageTask
+import io.scade.gradle.plugins.spm.tasks.BuildSwiftPackageTask
+import io.scade.gradle.plugins.spm.tasks.GenerateBridgingTask
+import io.scade.gradle.plugins.spm.tasks.ResolveScdToolTask
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -57,7 +57,7 @@ open class SpmGradlePlugin: Plugin<Project> {
 
         val assembleSwiftPackage = project.tasks.register("assembleSwiftPackage", AssembleSwiftPackageTask::class.java) {
             val curPlatform = OperatingSystem.current().swiftPlatform()
-            if (platforms.get().find { p: SwiftPlatform  -> p != curPlatform } != null) {
+            if (platforms.get().find { p: SwiftPlatform -> p != curPlatform } != null) {
                 it.dependsOn(buildSwiftPackage.get())
             }
 

@@ -1,6 +1,6 @@
-package com.scade.gradle.plugins.spm.tasks
+package io.scade.gradle.plugins.spm.tasks
 
-import com.scade.gradle.plugins.spm.SwiftPlatform
+import io.scade.gradle.plugins.spm.SwiftPlatform
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty

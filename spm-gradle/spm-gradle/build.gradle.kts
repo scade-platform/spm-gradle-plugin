@@ -4,7 +4,7 @@ plugins {
     id("com.gradle.plugin-publish") version "1.2.2"
 }
 
-group = "com.scade.gradle.plugins"
+group = "io.scade.gradle.plugins"
 version = "1.0.0"
 
 repositories {
@@ -24,11 +24,11 @@ gradlePlugin {
     vcsUrl = "https://github.com/scade-platform/spm-gradle-plugin.git"
     plugins {
         create("swiftpm") {
-            id = "com.scade.gradle.plugins.swiftpm"
-            displayName = "Gradle plugin for Swift packages"
+            id = "io.scade.gradle.plugins.swiftpm"
+            implementationClass = "io.scade.gradle.plugins.spm.SpmGradlePlugin"
+            displayName = "Swift Packages for Gradle"
             description = "Adds seamless interoberability between Swift and Java/Kotlin"
             tags = listOf("Swift", "SwiftPM", "SPM", "Java/Swift", "Kotlin/Swift")
-            implementationClass = "com.scade.gradle.plugins.spm.SpmGradlePlugin"
         }
     }
 }

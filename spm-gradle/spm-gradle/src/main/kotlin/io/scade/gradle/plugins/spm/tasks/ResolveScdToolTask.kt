@@ -1,4 +1,4 @@
-package com.scade.gradle.plugins.spm.tasks
+package io.scade.gradle.plugins.spm.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
