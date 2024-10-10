@@ -14,20 +14,23 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.swiftexport.registerSwiftExportTask
 
 
-fun OperatingSystem.swiftPlatform(): SwiftPlatform? {
-    return  if (OperatingSystem.current().isMacOsX) SwiftPlatform.macOS else
-            if (OperatingSystem.current().isWindows) SwiftPlatform.Windows else
-            if (OperatingSystem.current().isLinux) SwiftPlatform.Linux else null
+fun OperatingSystem.swiftTargetPlatform(): TargetPlatform? {
+    return  if (OperatingSystem.current().isMacOsX) TargetPlatform.macOS() else
+            if (OperatingSystem.current().isWindows) TargetPlatform.Windows() else
+            if (OperatingSystem.current().isLinux) TargetPlatform.Linux() else null
 }
 
 
 open class SpmGradlePlugin: Plugin<Project> {
-    open val defaultPlatform: SwiftPlatform?
-        get() = OperatingSystem.current().swiftPlatform()
+    open val defaultPlatform: TargetPlatform?
+        get() = OperatingSystem.current().swiftTargetPlatform()
 
 
     override fun apply(project: Project) {
@@ -56,9 +59,14 @@ open class SpmGradlePlugin: Plugin<Project> {
         }
 
         val assembleSwiftPackage = project.tasks.register("assembleSwiftPackage", AssembleSwiftPackageTask::class.java) {
-            val curPlatform = OperatingSystem.current().swiftPlatform()
-            if (platforms.get().find { p: SwiftPlatform -> p != curPlatform } != null) {
-                it.dependsOn(buildSwiftPackage.get())
+            val curPlatform = OperatingSystem.current().swiftTargetPlatform()
+
+            // Workaround to support applying macro while cross-compiling
+            //TODO: remove as soon as Swift 6 support is there
+            curPlatform?.let { curPlatform ->
+                if (platforms.get().find { p -> p.javaClass != curPlatform.javaClass } != null) {
+                    it.dependsOn(buildSwiftPackage.get())
+                }
             }
 
             it.scdFile.set(resolveScdToolTask.get().scdFile)
@@ -69,6 +77,14 @@ open class SpmGradlePlugin: Plugin<Project> {
 
         applyBridgingOutputs(project, generateBridging)
         applyAssembleOutputs(project, assembleSwiftPackage)
+
+        project.tasks.register("cleanSwiftBuildDir", Delete::class.java) {
+            it.delete.add(assembleSwiftPackage.get().buildDir)
+
+            project.tasks.named("clean") { clean ->
+                clean.dependsOn(it)
+            }
+        }
     }
 
     open fun applyBridgingOutputs(project: Project, task: TaskProvider<GenerateBridgingTask>) {
@@ -83,8 +99,12 @@ open class SpmGradlePlugin: Plugin<Project> {
     open fun applyAssembleOutputs(project: Project, task: TaskProvider<AssembleSwiftPackageTask>) {
         project.plugins.withType(ApplicationPlugin::class.java) {
             val app = project.extensions.getByType(JavaApplication::class.java)
-            val platform = OperatingSystem.current().swiftPlatform()?.name?.lowercase() ?: ""
+            val platform = OperatingSystem.current().swiftTargetPlatform()?.name?.lowercase() ?: ""
             app.applicationDefaultJvmArgs = listOf("-Djava.library.path=" + "${task.get().outputDirectory.get().dir(platform)}")
+
+            project.tasks.withType(JavaExec::class.java) {
+                it.dependsOn(task)
+            }
         }
     }
 }

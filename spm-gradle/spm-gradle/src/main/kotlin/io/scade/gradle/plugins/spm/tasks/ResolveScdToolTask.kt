@@ -23,8 +23,8 @@ abstract class ResolveScdToolTask() : DefaultTask() {
     fun run() {
         //TODO: check the tool's version
         if (!scdFile.asFile.get().exists()) {
-            val pkgVer = "2.6.0"
-            val pkgUrl = "https://github.com/scade-platform/scade-toolchain/releases/download/$pkgVer/scd-$pkgVer.pkg"
+            val pkgVer = "2.7.0"
+            val pkgUrl = "https://github.com/scade-platform/scade-build-tool/releases/download/$pkgVer/scd-$pkgVer.pkg"
             val pkgFile = temporaryDir.resolve("scd-$pkgVer.pkg")
 
             if (!pkgFile.exists()) {

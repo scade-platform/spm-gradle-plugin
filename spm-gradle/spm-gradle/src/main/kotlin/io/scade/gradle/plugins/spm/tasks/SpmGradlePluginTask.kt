@@ -3,6 +3,7 @@ package io.scade.gradle.plugins.spm.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
 import org.gradle.process.ExecResult
@@ -14,7 +15,7 @@ abstract class SpmGradlePluginTask : DefaultTask() {
     @get:InputFile
     val scdFile: RegularFileProperty = project.objects.fileProperty()
 
-    @get:Internal
+    @get:InputDirectory
     val path: DirectoryProperty = project.objects.directoryProperty()
 
     @get:Internal
