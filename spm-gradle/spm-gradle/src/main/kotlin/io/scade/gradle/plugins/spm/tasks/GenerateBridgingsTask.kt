@@ -12,6 +12,9 @@ abstract class GenerateBridgingTask() : SpmGradlePluginTask() {
     @Internal
     val product: Property<String> = project.objects.property(String::class.java)
 
+    @Internal
+    val javaVersion: Property<Int> = project.objects.property(Int::class.java)
+
     @get:OutputDirectory
     val bridgingSrc: DirectoryProperty = project.objects.directoryProperty()
 
@@ -33,16 +36,25 @@ abstract class GenerateBridgingTask() : SpmGradlePluginTask() {
 
     private val pluginAvailable: Boolean
         get() {
-            return swift("package", "--scratch-path", buildDirPath, "--package-path", packageDir, "plugin", "--list") {_, out ->
-               out.split("\n").find { it.startsWith("‘generate-java-bridging’") } != null
+            return swift("package",
+                "--scratch-path", buildDirPath,
+                "--package-path", packageDir,
+                "plugin", "--list"
+            ) {_, out ->
+                    out.split("\n").find { it.startsWith("‘generate-java-bridging’") } != null
             }
         }
 
     @TaskAction
     fun run() {
-//        println("Command line: ${"package" + " --scratch-path " + buildDirPath + " --package-path " + packageDir + " plugin " + " generate-java-bridging " + " -p " + product.get()}")
         if (pluginAvailable) {
-            swift("package", "--scratch-path", buildDirPath, "--package-path", packageDir, "plugin", "generate-java-bridging", "-p", product.get())
+            swift("package",
+                "--scratch-path", buildDirPath,
+                "--package-path", packageDir,
+                "plugin", "generate-java-bridging",
+                "--product", product.get(),
+                "--java-version", javaVersion.getOrElse(11)
+            )
         }
     }
 }

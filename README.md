@@ -23,14 +23,14 @@ To apply one of the plugins, add the plugin's id into the plugins block in the b
 `spm-gradle`
 ```kotlin
 plugins { 
-    id("io.scade.gradle.plugins.swiftpm") version "1.0.0"
+    id("io.scade.gradle.plugins.swiftpm") version "1.0.1"
 }
 ```
 
 `spm-gradle-android`
 ```kotlin
 plugins {
-    id("io.scade.gradle.plugins.android.swiftpm") version "1.0.0"
+    id("io.scade.gradle.plugins.android.swiftpm") version "1.0.1"
 }
 ```
 
@@ -44,6 +44,18 @@ swiftpm {
     path = file("<PACKAGE LOCATION>")
     // Name of the package's product 
     product = "<PRODUCT NAME>"
+    
+    // Optional properties
+    
+    // Java version (8, 9, 11, ...) used for the generated code compatibility
+    // Example: set compatibility with Java 8
+    javaVersion = 8 // (default: Java 11)
+    
+    // Platform configuration including custom toolchain path
+    // Example: a custom path to the Android toolchain    
+    platforms = listOf(
+        TargetPlatform.Android(file("<PATH TO THE TOOLCHAIN LOCATION>"))
+    )
 }
 ```
 

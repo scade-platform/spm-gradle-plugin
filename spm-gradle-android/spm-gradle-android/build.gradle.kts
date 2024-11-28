@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.scade.gradle.plugins.android"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenLocal()
@@ -18,7 +18,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.10")
     implementation("com.android.tools.build:gradle:8.6.0")
 
-    implementation("io.scade.gradle.plugins:spm-gradle:1.0.0")
+    implementation("io.scade.gradle.plugins:spm-gradle:1.0.1")
 }
 
 kotlin {

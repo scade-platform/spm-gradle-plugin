@@ -34,4 +34,5 @@ interface SpmGradlePluginExtension {
     val path: DirectoryProperty
     val product: Property<String>
     val platforms: ListProperty<TargetPlatform>
+    val javaVersion: Property<Int>
 }
