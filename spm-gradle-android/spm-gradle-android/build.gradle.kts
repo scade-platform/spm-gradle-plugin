@@ -9,6 +9,7 @@ group = "io.scade.gradle.plugins.android"
 version = "1.0.1"
 
 repositories {
+    gradlePluginPortal()
     mavenLocal()
     mavenCentral()
     google()
