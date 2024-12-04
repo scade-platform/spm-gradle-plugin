@@ -23,14 +23,14 @@ To apply one of the plugins, add the plugin's id into the plugins block in the b
 `spm-gradle`
 ```kotlin
 plugins { 
-    id("io.scade.gradle.plugins.swiftpm") version "1.0.1"
+    id("io.scade.gradle.plugins.swiftpm") version "1.0.2"
 }
 ```
 
 `spm-gradle-android`
 ```kotlin
 plugins {
-    id("io.scade.gradle.plugins.android.swiftpm") version "1.0.1"
+    id("io.scade.gradle.plugins.android.swiftpm") version "1.0.2"
 }
 ```
 

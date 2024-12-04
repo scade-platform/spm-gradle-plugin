@@ -37,6 +37,8 @@ open class SpmGradlePlugin: Plugin<Project> {
         val extension = project.extensions.create("swiftpm", SpmGradlePluginExtension::class.java)
         val resolveScdToolTask = project.tasks.register("resolveScdTool", ResolveScdToolTask::class.java)
 
+        resolveScdToolTask.get().scd.set(extension.scd)
+
         val platforms = extension.platforms.map {
             if (it.isEmpty()) {
                 val res = it.toMutableList()

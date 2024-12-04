@@ -4,6 +4,7 @@ import java.io.File
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 
 
 @Suppress("ClassName")
@@ -35,4 +36,5 @@ interface SpmGradlePluginExtension {
     val product: Property<String>
     val platforms: ListProperty<TargetPlatform>
     val javaVersion: Property<Int>
+    val scd: RegularFileProperty
 }
