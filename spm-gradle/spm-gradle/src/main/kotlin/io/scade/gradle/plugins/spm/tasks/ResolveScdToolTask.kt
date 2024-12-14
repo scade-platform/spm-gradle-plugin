@@ -1,20 +1,24 @@
 package io.scade.gradle.plugins.spm.tasks
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
+import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
+import java.net.HttpURLConnection
 import java.net.URI
+import java.net.URL
 import java.nio.file.Paths
 
 abstract class ResolveScdToolTask() : DefaultTask() {
     @Optional
     @InputFile
     val scd: RegularFileProperty = project.objects.fileProperty()
+
+    @Optional
+    @Input
+    val scdAutoUpdate: Property<Boolean> = project.objects.property(Boolean::class.java)
 
     @OutputFile
     val scdFile: RegularFileProperty = project.objects.fileProperty()
@@ -33,27 +37,89 @@ abstract class ResolveScdToolTask() : DefaultTask() {
         if (scd != null) {
             scdFile.set(scd)
 
-        } else if (!scdFile.asFile.get().exists()) {
-            //TODO: check the tool's version
+        } else if (scdFile.asFile.get().exists()) {
+            val cur = getInstalledVersion(scdFile.asFile.get())
+            cur?.let {
+                println("Scade Build Tool version ${cur.first}.${cur.second}.${cur.third} is found ...")
 
-            val pkgVer = "2.7.0"
-            val pkgUrl = "https://github.com/scade-platform/scade-build-tool/releases/download/$pkgVer/scd-$pkgVer.pkg"
-            val pkgFile = temporaryDir.resolve("scd-$pkgVer.pkg")
+                val latest = getLatestVersion()
 
-            if (!pkgFile.exists()) {
-                println("Downloading $pkgUrl...")
-                URI(pkgUrl).toURL().openStream().use {
-                    it.copyTo(FileOutputStream(pkgFile))
+                if ((latest.first > cur.first) ||
+                    (latest.first == cur.first && latest.second > cur.second) ||
+                    (latest.first == cur.first && latest.second == cur.second && latest.third > cur.third)) {
+
+                    println("New version of the Scade Build Tool is available: ${latest.versionString()}")
+
+
+                    if(scdAutoUpdate.orElse(false).get()) {
+                        println("Updating Scade Build Tool to the latest version ... ")
+                        downloadAndInstall(latest)
+                    }
                 }
             }
+        } else {
+            downloadAndInstallLatest()
+        }
+    }
 
-            if (pkgFile.exists()) {
-                println("Installing Scade Build Tool $pkgVer...")
+    private fun downloadAndInstall(version: Triple<Int, Int, Int>?) {
+        val pkgVer = (version ?: getLatestVersion()).versionString()
+        val pkgFileName = "scd-${pkgVer}.pkg"
 
-                project.exec {
-                    it.commandLine("installer", "-pkg", "$pkgFile", "-target", "CurrentUserHomeDirectory")
-                }
+        val pkgFile = temporaryDir.resolve(pkgFileName)
+
+        val downloadUrl = URI("https://github.com/scade-platform/scade-build-tool/releases/download/${pkgVer}/${pkgFileName}").toURL()
+
+        if (!pkgFile.exists()) {
+            println("Downloading from ${downloadUrl}...")
+            downloadUrl.openStream().use {
+                it.copyTo(FileOutputStream(pkgFile))
+            }
+        }
+
+        if (pkgFile.exists()) {
+            println("Installing Scade Build Tool...")
+
+            project.exec {
+                it.commandLine("installer", "-pkg", "$pkgFile", "-target", "CurrentUserHomeDirectory")
             }
         }
     }
+
+    private fun downloadAndInstallLatest() {
+        downloadAndInstall(null)
+    }
+
+    private fun getLatestVersion() : Triple<Int, Int, Int> {
+        val latestUrl = URI("https://github.com/scade-platform/scade-build-tool/releases/latest").toURL()
+        val conn = latestUrl.openConnection() as HttpURLConnection
+        conn.instanceFollowRedirects = false
+
+        val version = conn.getHeaderField("Location").split("/").last().split('.')
+        return Triple(version[0].toInt(), version[1].toInt(), version[2].toInt())
+    }
+
+    private fun getInstalledVersion(scd:  java.io.File) : Triple<Int, Int, Int>? {
+        val versionInfo = ByteArrayOutputStream().use { out ->
+            project.exec {
+                it.commandLine(scd.path, "--version")
+                it.standardOutput = out
+            }
+            out.toString()
+        }
+
+        val versionRegex = """\D*(?<major>\d*)\.(?<minor>\d*).(?<patch>\d*)""".toRegex()
+        val versionMatch = versionRegex.find(versionInfo)
+
+        return versionMatch?.let {
+            Triple(it.groups["major"]!!.value.toInt(),
+                   it.groups["minor"]!!.value.toInt(),
+                   it.groups["patch"]!!.value.toInt())
+
+        } ?: return null
+    }
+}
+
+private fun Triple<Int, Int, Int>.versionString() : String {
+    return "${first}.${second}.${third}"
 }

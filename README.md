@@ -11,8 +11,8 @@ The projects consists of two plugins: the `spm-gradle` for the integration into 
 
 ### Dependencies
 
--  Swift Toolchain ([https://www.swift.org](url))
--  Swift Toolchain for Android ([https://www.swift-android.com](url))
+-  [Swift Toolchain](https://www.swift.org)
+-  [Swift Toolchain for Android](https://www.swift-android.com)
 
 ### Usage
 
@@ -45,7 +45,7 @@ swiftpm {
     // Name of the package's product 
     product = "<PRODUCT NAME>"
     
-    // Optional properties
+    // OPTIONAL PROPERTIES
     
     // Java version (8, 9, 11, ...) used for the generated code compatibility
     // Example: set compatibility with Java 8
@@ -56,6 +56,13 @@ swiftpm {
     platforms = listOf(
         TargetPlatform.Android(file("<PATH TO THE TOOLCHAIN LOCATION>"))
     )
+    
+    // Configuration for the Scade Build Tool (scd)
+    
+    // Custom binary location     
+    scd = file("<SCD BINARY LOCATION>")
+    // Auto-update for the scd build tool
+    scdAutoUpdate = true
 }
 ```
 
@@ -85,4 +92,4 @@ pluginManagement {
 
 ## License
 
-This project is licensed under the Apache 2.0 License - see the LICENSE.md file for details
+This project is licensed under the Apache 2.0 License - see the LICENSE file for details

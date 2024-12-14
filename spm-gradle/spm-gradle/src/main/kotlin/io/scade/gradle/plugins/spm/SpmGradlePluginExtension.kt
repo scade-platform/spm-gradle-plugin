@@ -37,4 +37,5 @@ interface SpmGradlePluginExtension {
     val platforms: ListProperty<TargetPlatform>
     val javaVersion: Property<Int>
     val scd: RegularFileProperty
+    val scdAutoUpdate: Property<Boolean>
 }

@@ -38,6 +38,7 @@ open class SpmGradlePlugin: Plugin<Project> {
         val resolveScdToolTask = project.tasks.register("resolveScdTool", ResolveScdToolTask::class.java)
 
         resolveScdToolTask.get().scd.set(extension.scd)
+        resolveScdToolTask.get().scdAutoUpdate.set(extension.scdAutoUpdate)
 
         val platforms = extension.platforms.map {
             if (it.isEmpty()) {
