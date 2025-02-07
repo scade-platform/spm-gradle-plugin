@@ -63,6 +63,8 @@ open class SpmGradlePlugin: Plugin<Project> {
         }
 
         val assembleSwiftPackage = project.tasks.register("assembleSwiftPackage", AssembleSwiftPackageTask::class.java) {
+
+            /*
             val curPlatform = OperatingSystem.current().swiftTargetPlatform()
 
             // Workaround to support applying macro while cross-compiling
@@ -72,6 +74,7 @@ open class SpmGradlePlugin: Plugin<Project> {
                     it.dependsOn(buildSwiftPackage.get())
                 }
             }
+            */
 
             it.scdFile.set(resolveScdToolTask.get().scdFile)
 
