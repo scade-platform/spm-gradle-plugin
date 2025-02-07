@@ -1,14 +1,15 @@
 package io.scade.gradle.plugins.spm.tasks
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URI
-import java.net.URL
 import java.nio.file.Paths
 
 abstract class ResolveScdToolTask() : DefaultTask() {
@@ -20,13 +21,14 @@ abstract class ResolveScdToolTask() : DefaultTask() {
     @Input
     val scdAutoUpdate: Property<Boolean> = project.objects.property(Boolean::class.java)
 
+    private val scdFileInternal: RegularFileProperty = project.objects.fileProperty()
+
     @OutputFile
-    val scdFile: RegularFileProperty = project.objects.fileProperty()
+    val scdFile: Provider<RegularFile> = scdFileInternal
 
     init {
-        scdFile.convention {
-            Paths.get(System.getProperty("user.home")).resolve(
-            "Library/Developer/Scade/Toolchains/scd/bin/scd").toFile()
+        scdFileInternal.convention {
+            Paths.get(System.getProperty("user.home")).resolve("Library/Developer/Scade/Toolchains/scd/bin/scd").toFile()
         }
     }
 
@@ -35,10 +37,10 @@ abstract class ResolveScdToolTask() : DefaultTask() {
         val scd = scd.orNull?.asFile
 
         if (scd != null) {
-            scdFile.set(scd)
+            scdFileInternal.set(scd)
 
-        } else if (scdFile.asFile.get().exists()) {
-            val cur = getInstalledVersion(scdFile.asFile.get())
+        } else if (scdFileInternal.asFile.get().exists()) {
+            val cur = getInstalledVersion(scdFileInternal.asFile.get())
             cur?.let {
                 println("Scade Build Tool version ${cur.first}.${cur.second}.${cur.third} is found ...")
 
