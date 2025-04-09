@@ -1,10 +1,16 @@
 package io.scade.gradle.plugins.spm
 
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import java.io.File
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.model.ObjectFactory
+
+
+import javax.inject.Inject
 
 
 @Suppress("ClassName")
@@ -31,11 +37,41 @@ sealed interface TargetPlatform {
 }
 
 
-interface SpmGradlePluginExtension {
-    val path: DirectoryProperty
-    val product: Property<String>
-    val platforms: ListProperty<TargetPlatform>
-    val javaVersion: Property<Int>
-    val scd: RegularFileProperty
-    val scdAutoUpdate: Property<Boolean>
+
+class DependencyCollector (private val dependencyHandler: DependencyHandler) {
+    val dependencies = mutableListOf<Dependency>()
+
+    fun project(path: String) {
+        dependencies.add(dependencyHandler.project(mapOf("path" to path)))
+    }
+
+    fun link(notation: String) {
+        dependencies.add(dependencyHandler.create(notation))
+    }
+
+    operator fun invoke(notation: String) {
+        dependencies.add(dependencyHandler.create(notation))
+    }
+}
+
+
+abstract class SpmGradlePluginExtension @Inject constructor(
+    private val dependencyHandler: DependencyHandler,
+    objects: ObjectFactory
+) {
+
+    abstract val path: DirectoryProperty
+    abstract val product: Property<String>
+
+    abstract val platforms: ListProperty<TargetPlatform>
+    abstract val javaVersion: Property<Int>
+    abstract val scd: RegularFileProperty
+    abstract val scdAutoUpdate: Property<Boolean>
+
+    val dependencies: ListProperty<Dependency> = objects.listProperty(Dependency::class.java)
+
+    fun dependencies(action: DependencyCollector.() -> Unit) {
+        val collector = DependencyCollector(dependencyHandler).apply(action)
+        dependencies.addAll(collector.dependencies)
+    }
 }

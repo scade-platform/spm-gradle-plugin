@@ -42,7 +42,7 @@ abstract class ResolveScdToolTask() : DefaultTask() {
         } else if (scdFileInternal.asFile.get().exists()) {
             val cur = getInstalledVersion(scdFileInternal.asFile.get())
             cur?.let {
-                println("Scade Build Tool version ${cur.first}.${cur.second}.${cur.third} is found ...")
+                project.logger.lifecycle("Scade Build Tool version ${cur.first}.${cur.second}.${cur.third} is found ...")
 
                 val latest = getLatestVersion()
 
@@ -50,11 +50,11 @@ abstract class ResolveScdToolTask() : DefaultTask() {
                     (latest.first == cur.first && latest.second > cur.second) ||
                     (latest.first == cur.first && latest.second == cur.second && latest.third > cur.third)) {
 
-                    println("New version of the Scade Build Tool is available: ${latest.versionString()}")
+                    project.logger.lifecycle("New version of the Scade Build Tool is available: ${latest.versionString()}")
 
 
                     if(scdAutoUpdate.orElse(false).get()) {
-                        println("Updating Scade Build Tool to the latest version ... ")
+                        project.logger.lifecycle("Updating Scade Build Tool to the latest version ... ")
                         downloadAndInstall(latest)
                     }
                 }
@@ -73,14 +73,14 @@ abstract class ResolveScdToolTask() : DefaultTask() {
         val downloadUrl = URI("https://github.com/scade-platform/scade-build-tool/releases/download/${pkgVer}/${pkgFileName}").toURL()
 
         if (!pkgFile.exists()) {
-            println("Downloading from ${downloadUrl}...")
+            project.logger.lifecycle("Downloading from ${downloadUrl}...")
             downloadUrl.openStream().use {
                 it.copyTo(FileOutputStream(pkgFile))
             }
         }
 
         if (pkgFile.exists()) {
-            println("Installing Scade Build Tool...")
+            project.logger.lifecycle("Installing Scade Build Tool...")
 
             project.exec {
                 it.commandLine("installer", "-pkg", "$pkgFile", "-target", "CurrentUserHomeDirectory")

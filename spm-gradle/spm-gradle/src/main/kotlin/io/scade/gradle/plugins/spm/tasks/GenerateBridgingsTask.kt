@@ -4,6 +4,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.file.DirectoryProperty
 
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
@@ -15,10 +16,10 @@ abstract class GenerateBridgingTask() : SpmGradlePluginTask() {
     @Internal
     val javaVersion: Property<Int> = project.objects.property(Int::class.java)
 
-    @get:OutputDirectory
+    @OutputDirectory
     val bridgingSrc: DirectoryProperty = project.objects.directoryProperty()
 
-    @get:OutputDirectory
+    @OutputDirectory
     val bridgingJavaSrc: DirectoryProperty = project.objects.directoryProperty()
 
     init {

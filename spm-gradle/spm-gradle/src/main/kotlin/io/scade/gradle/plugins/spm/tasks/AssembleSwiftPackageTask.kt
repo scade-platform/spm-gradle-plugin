@@ -7,16 +7,20 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
+
 abstract class AssembleSwiftPackageTask() : SpmGradlePluginTask() {
-    @get:Internal
+    @Internal
     val platforms: ListProperty<TargetPlatform> = project.objects.listProperty(TargetPlatform::class.java)
 
+    @Internal
+    val linkDependencies: ListProperty<String> = project.objects.listProperty(String::class.java)
 
-    @get:OutputDirectory
+    @OutputDirectory
     val outputDirectory: DirectoryProperty = project.objects.directoryProperty()
 
 
     init {
+        linkDependencies.convention(listOf())
         outputDirectory.set(project.layout.buildDirectory.dir("lib"))
     }
 
@@ -36,10 +40,15 @@ abstract class AssembleSwiftPackageTask() : SpmGradlePluginTask() {
                 }
         }
 
+        val linkArgs = linkDependencies.get().flatMap {
+            listOf("-l", it)
+        }
+
         scd("archive",
             "--build-dir", buildDirPath,
             "--path", packageDir,
             "--output", project.layout.buildDirectory.get(),
+            *linkArgs.toTypedArray(),
             *platformArgs.toTypedArray())
     }
 }
