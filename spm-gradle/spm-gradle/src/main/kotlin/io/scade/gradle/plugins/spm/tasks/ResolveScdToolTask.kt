@@ -21,13 +21,11 @@ abstract class ResolveScdToolTask() : DefaultTask() {
     @Input
     val scdAutoUpdate: Property<Boolean> = project.objects.property(Boolean::class.java)
 
-    private val scdFileInternal: RegularFileProperty = project.objects.fileProperty()
-
     @OutputFile
-    val scdFile: Provider<RegularFile> = scdFileInternal
+    val scdFile: RegularFileProperty = project.objects.fileProperty()
 
     init {
-        scdFileInternal.convention {
+        scdFile.convention {
             Paths.get(System.getProperty("user.home")).resolve("Library/Developer/Scade/Toolchains/scd/bin/scd").toFile()
         }
     }
@@ -37,10 +35,10 @@ abstract class ResolveScdToolTask() : DefaultTask() {
         val scd = scd.orNull?.asFile
 
         if (scd != null) {
-            scdFileInternal.set(scd)
+            scdFile.set(scd)
 
-        } else if (scdFileInternal.asFile.get().exists()) {
-            val cur = getInstalledVersion(scdFileInternal.asFile.get())
+        } else if (scdFile.asFile.get().exists()) {
+            val cur = getInstalledVersion(scdFile.asFile.get())
             cur?.let {
                 project.logger.lifecycle("Scade Build Tool version ${cur.first}.${cur.second}.${cur.third} is found ...")
 

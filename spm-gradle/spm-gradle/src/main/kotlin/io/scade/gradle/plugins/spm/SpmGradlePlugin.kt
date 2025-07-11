@@ -8,13 +8,10 @@ import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
-import org.gradle.api.attributes.Attribute
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaApplication
 import org.gradle.api.plugins.ApplicationPlugin
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.Delete
@@ -40,17 +37,15 @@ open class SpmGradlePlugin @Inject constructor (
     open val defaultPlatform: TargetPlatform?
         get() = OperatingSystem.current().swiftTargetPlatform()
 
-    private val scd: RegularFileProperty = objects.fileProperty()
+    private var resolveScdTask: TaskProvider<ResolveScdToolTask>? = null
 
     override fun apply(project: Project) {
         val extension = project.extensions.create("swiftpm", SpmGradlePluginExtension::class.java)
 
-        val resolveScd = project.tasks.register("resolveScdTool", ResolveScdToolTask::class.java) {
+        resolveScdTask = project.tasks.register("resolveScdTool", ResolveScdToolTask::class.java) {
             it.scd.set(extension.scd)
             it.scdAutoUpdate.set(extension.scdAutoUpdate)
         }
-
-        scd.set(resolveScd.get().scdFile)
 
         registerBridgingTask(project, extension)
         registerAssembleTasks(project, extension)
@@ -83,29 +78,32 @@ open class SpmGradlePlugin @Inject constructor (
             }
         }
 
-        val task = project.tasks.register("assemble${variant.capitalized()}SwiftPackage",
+        val assembleTask = project.tasks.register("assemble${variant.capitalized()}SwiftPackage",
             AssembleSwiftPackageTask::class.java) {
 
-            it.scdFile.set(scd)
+            resolveScdTask?.let { tp ->
+                it.scdFile.set(tp.flatMap { t -> t.scdFile })
+            }
+
             it.platforms.set(platforms)
             it.path.set(extension.path)
         }
 
-        project.tasks.register("clean${variant.capitalized()}SwiftBuildDir", Delete::class.java) {
-            it.delete.add(task.get().buildDir)
+        val cleanTask = project.tasks.register("clean${variant.capitalized()}SwiftBuildDir", Delete::class.java) {
+            it.delete.add(assembleTask.get().buildDir)
         }
 
         project.tasks.named("clean") {
-            it.dependsOn(task)
+            it.dependsOn(cleanTask)
         }
 
         project.afterEvaluate {
-            task.get().linkDependencies.set(extension.dependencies.map {
+            assembleTask.get().linkDependencies.set(extension.dependencies.map {
                 resolveDependencies(project, it)
             })
         }
 
-        return task
+        return assembleTask
     }
 
     open fun registerAssembleTask(project: Project,
@@ -120,7 +118,11 @@ open class SpmGradlePlugin @Inject constructor (
 
     open fun registerBridgingTask(project: Project, extension: SpmGradlePluginExtension) {
         val task = project.tasks.register("generateBridging", GenerateBridgingTask::class.java) {
-            it.scdFile.set(scd)
+
+            resolveScdTask?.let { tp ->
+                it.scdFile.set(tp.flatMap { t -> t.scdFile })
+            }
+
             it.path.set(extension.path)
             it.product.set(extension.product)
             it.javaVersion.set(extension.javaVersion)
