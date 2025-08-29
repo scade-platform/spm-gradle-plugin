@@ -1,0 +1,52 @@
+name: Publish Gradle Plugins
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish-spm-gradle:
+    name: Publish spm-gradle
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./spm-gradle
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Publish spm-gradle plugin
+        run: ./gradlew publishPlugins
+        env:
+          GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
+          GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
+
+  publish-spm-gradle-android:
+    name: Publish spm-gradle-android
+    runs-on: ubuntu-latest
+    needs: publish-spm-gradle
+    defaults:
+      run:
+        working-directory: ./spm-gradle-android
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Publish spm-gradle-android plugin
+        run: ./gradlew publishPlugins
+        env:
+          GRADLE_PUBLISH_KEY: ${{ secrets.GRADLE_PUBLISH_KEY }}
+          GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}

@@ -60,6 +60,18 @@ abstract class ResolveScdToolTask() : DefaultTask() {
         } else {
             downloadAndInstallLatest()
         }
+
+        if (!scdFile.asFile.get().exists()) {
+            throw RuntimeException("Scade Build Tool could not be resolved.")
+
+        } else {
+            project.logger.lifecycle("Scade Build Tool is ready to use.")
+            project.logger.lifecycle("Check and update Swift for Android toolchain ...")
+            project.exec {
+                it.commandLine(scdFile.asFile.get(), "toolchain", "install-latest")
+            }
+        }
+
     }
 
     private fun downloadAndInstall(version: Triple<Int, Int, Int>?) {
