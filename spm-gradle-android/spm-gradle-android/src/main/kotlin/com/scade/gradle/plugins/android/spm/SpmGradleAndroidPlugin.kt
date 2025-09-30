@@ -2,7 +2,7 @@ package com.scade.gradle.plugins.android.spm
 
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.AppPlugin
-import com.android.build.gradle.tasks.MergeSourceSetFolders
+
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
@@ -14,6 +14,8 @@ import io.scade.gradle.plugins.spm.SpmGradlePlugin
 import io.scade.gradle.plugins.spm.SpmGradlePluginExtension
 import io.scade.gradle.plugins.spm.TargetPlatform
 import io.scade.gradle.plugins.spm.tasks.GenerateBridgingTask
+import io.scade.gradle.plugins.spm.tasks.AssembleSwiftPackageTask
+
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.util.PatternSet
 import org.gradle.internal.extensions.stdlib.capitalized
@@ -23,6 +25,9 @@ import javax.inject.Inject
 class SpmGradleAndroidPlugin @Inject constructor (
     objects: ObjectFactory
 ): SpmGradlePlugin(objects) {
+
+    override val assembleTaskClass: Class<out AssembleSwiftPackageTask>
+        get() = AssembleAndroidSwiftPackageTask::class.java
 
     override val defaultPlatform: TargetPlatform
         get() = TargetPlatform.Android()
@@ -61,7 +66,7 @@ class SpmGradleAndroidPlugin @Inject constructor (
                 project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
 
             androidComponents.onVariants { variant ->
-                registerAssembleTask(project, extension, variant.name) { task ->
+                registerAssembleTask(project, extension, variant.name, variant.debuggable) { task ->
                     variant.sources.jniLibs?.addStaticSourceDirectory(task.get().outputDirectory.get().asFile.path)
 
                     project.afterEvaluate {
@@ -86,6 +91,12 @@ class SpmGradleAndroidPlugin @Inject constructor (
 
 
     override fun configureBridgingTask(project: Project, task: TaskProvider<GenerateBridgingTask>) {
+        // Set java version to 8 for Android compatibility if not set
+        if (!task.get().javaVersion.isPresent) {
+            task.get().javaVersion.set(8)
+        }
+        task.get().extraArguments.add("--generate-android-view-models")
+
         project.plugins.withType(AppPlugin::class.java) {
             val androidComponents =
                 project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)

@@ -1,10 +1,10 @@
 package io.scade.gradle.plugins.spm.tasks
 
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.file.DirectoryProperty
 
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
@@ -15,6 +15,9 @@ abstract class GenerateBridgingTask() : SpmGradlePluginTask() {
 
     @Internal
     val javaVersion: Property<Int> = project.objects.property(Int::class.java)
+
+    @Internal
+    val extraArguments: ListProperty<String> = project.objects.listProperty(String::class.java)
 
     @OutputDirectory
     val bridgingSrc: DirectoryProperty = project.objects.directoryProperty()
@@ -54,7 +57,9 @@ abstract class GenerateBridgingTask() : SpmGradlePluginTask() {
                 "--package-path", packageDir,
                 "plugin", "generate-java-bridging",
                 "--product", product.get(),
-                "--java-version", javaVersion.getOrElse(11)
+                "--java-version", javaVersion.getOrElse(11),
+                "--copy-java-sources",
+                *extraArguments.get().toTypedArray()
             )
         }
     }

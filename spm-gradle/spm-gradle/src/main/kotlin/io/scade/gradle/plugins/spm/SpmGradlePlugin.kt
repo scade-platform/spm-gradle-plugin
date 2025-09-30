@@ -30,9 +30,10 @@ fun OperatingSystem.swiftTargetPlatform(): TargetPlatform? {
 }
 
 
-open class SpmGradlePlugin @Inject constructor (
-    objects: ObjectFactory
-) : Plugin<Project> {
+open class SpmGradlePlugin @Inject constructor (objects: ObjectFactory)
+    : Plugin<Project> {
+
+    open val assembleTaskClass: Class<out AssembleSwiftPackageTask> = AssembleSwiftPackageTask::class.java
 
     open val defaultPlatform: TargetPlatform?
         get() = OperatingSystem.current().swiftTargetPlatform()
@@ -52,7 +53,7 @@ open class SpmGradlePlugin @Inject constructor (
     }
 
     open fun registerAssembleTasks(project: Project, extension: SpmGradlePluginExtension) {
-        registerAssembleTask(project, extension, "") { task ->
+        registerAssembleTask(project, extension) { task ->
             project.plugins.withType(ApplicationPlugin::class.java) {
                 val app = project.extensions.getByType(JavaApplication::class.java)
                 val platform = OperatingSystem.current().swiftTargetPlatform()?.name?.lowercase() ?: ""
@@ -65,8 +66,10 @@ open class SpmGradlePlugin @Inject constructor (
         }
     }
 
-    open fun registerAssembleTask(project: Project, extension: SpmGradlePluginExtension, variant: String = ""):
-            TaskProvider<AssembleSwiftPackageTask> {
+    open fun registerAssembleTask(project: Project,
+                                  extension: SpmGradlePluginExtension,
+                                  variant: String,
+                                  debuggable: Boolean): TaskProvider<out AssembleSwiftPackageTask> {
 
         val platforms = extension.platforms.map {
             if (it.isEmpty()) {
@@ -78,15 +81,17 @@ open class SpmGradlePlugin @Inject constructor (
             }
         }
 
-        val assembleTask = project.tasks.register("assemble${variant.capitalized()}SwiftPackage",
-            AssembleSwiftPackageTask::class.java) {
+        val assembleTask = project.tasks.register(
+            "assemble${variant.capitalized()}SwiftPackage", assembleTaskClass) {
 
             resolveScdTask?.let { tp ->
                 it.scdFile.set(tp.flatMap { t -> t.scdFile })
             }
 
-            it.platforms.set(platforms)
             it.path.set(extension.path)
+            it.product.set(extension.product)
+            it.platforms.set(platforms)
+            it.assembleDebug.set(debuggable)
         }
 
         val cleanTask = project.tasks.register("clean${variant.capitalized()}SwiftBuildDir", Delete::class.java) {
@@ -108,10 +113,12 @@ open class SpmGradlePlugin @Inject constructor (
 
     open fun registerAssembleTask(project: Project,
                                   extension: SpmGradlePluginExtension,
-                                  variant: String,
-                                  configurationAction: Action<TaskProvider<AssembleSwiftPackageTask>>
-    ): TaskProvider<AssembleSwiftPackageTask> {
-        val task = registerAssembleTask(project, extension, variant)
+                                  variant: String = "",
+                                  debuggable: Boolean = true,
+                                  configurationAction: Action<TaskProvider<out AssembleSwiftPackageTask>>
+
+    ): TaskProvider<out AssembleSwiftPackageTask> {
+        val task = registerAssembleTask(project, extension, variant, debuggable)
         configurationAction.execute(task)
         return task
     }
