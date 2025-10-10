@@ -67,6 +67,10 @@ class SpmGradleAndroidPlugin @Inject constructor (
 
             androidComponents.onVariants { variant ->
                 registerAssembleTask(project, extension, variant.name, variant.debuggable) { task ->
+                    (task.get() as AssembleAndroidSwiftPackageTask).adbPath.set(
+                        androidComponents.sdkComponents.adb
+                    )
+
                     variant.sources.jniLibs?.addStaticSourceDirectory(task.get().outputDirectory.get().asFile.path)
 
                     project.afterEvaluate {
