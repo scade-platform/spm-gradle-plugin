@@ -1,4 +1,4 @@
-package com.scade.gradle.plugins.android.spm
+package io.scade.gradle.plugins.android.spm
 
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.AppPlugin
@@ -26,11 +26,16 @@ class SpmGradleAndroidPlugin @Inject constructor (
     objects: ObjectFactory
 ): SpmGradlePlugin(objects) {
 
+    companion object {
+       val defaultBuildArchs = listOf("x86_64", "arm64-v8a")
+       val supportedBuildArchs = listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+    }
+
     override val assembleTaskClass: Class<out AssembleSwiftPackageTask>
         get() = AssembleAndroidSwiftPackageTask::class.java
 
     override val defaultPlatform: TargetPlatform
-        get() = TargetPlatform.Android()
+        get() = TargetPlatform.Android(archs = defaultBuildArchs)
 
     /*
     override fun registerAssembleTasks(project: Project, extension: SpmGradlePluginExtension) {
@@ -67,9 +72,11 @@ class SpmGradleAndroidPlugin @Inject constructor (
 
             androidComponents.onVariants { variant ->
                 registerAssembleTask(project, extension, variant.name, variant.debuggable) { task ->
-                    (task.get() as AssembleAndroidSwiftPackageTask).adbPath.set(
-                        androidComponents.sdkComponents.adb
-                    )
+                    (task.get() as? AssembleAndroidSwiftPackageTask)?.let {
+                        it.sdkPath.set(androidComponents.sdkComponents.sdkDirectory)
+                        it.ndkPath.set(androidComponents.sdkComponents.ndkDirectory)
+                        it.adbPath.set(androidComponents.sdkComponents.adb)
+                    }
 
                     variant.sources.jniLibs?.addStaticSourceDirectory(task.get().outputDirectory.get().asFile.path)
 

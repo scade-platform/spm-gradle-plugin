@@ -16,6 +16,10 @@ import javax.inject.Inject
 @Suppress("ClassName")
 sealed interface TargetPlatform {
     val name: String
+
+    val archs: List<String>
+        get() = listOf()
+
     val toolchain: File?
         get() = null
 
@@ -23,7 +27,8 @@ sealed interface TargetPlatform {
         override val name = "macOS"
     }
 
-    class Android(override val toolchain: File? = null): TargetPlatform {
+    class Android(override val archs: List<String> = listOf(),
+                  override val toolchain: File? = null): TargetPlatform {
         override val name = "Android"
     }
 
@@ -67,6 +72,7 @@ abstract class SpmGradlePluginExtension @Inject constructor(
     abstract val javaVersion: Property<Int>
     abstract val scd: RegularFileProperty
     abstract val scdAutoUpdate: Property<Boolean>
+    abstract val scdOptions: ListProperty<String>
 
     val dependencies: ListProperty<Dependency> = objects.listProperty(Dependency::class.java)
 

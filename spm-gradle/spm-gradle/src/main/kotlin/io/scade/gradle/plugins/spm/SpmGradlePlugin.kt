@@ -92,6 +92,7 @@ open class SpmGradlePlugin @Inject constructor (objects: ObjectFactory)
             it.product.set(extension.product)
             it.platforms.set(platforms)
             it.assembleDebug.set(debuggable)
+            it.scdOptions.set(extension.scdOptions)
         }
 
         val cleanTask = project.tasks.register("clean${variant.capitalized()}SwiftBuildDir", Delete::class.java) {

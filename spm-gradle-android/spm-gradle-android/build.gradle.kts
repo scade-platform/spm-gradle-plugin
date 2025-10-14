@@ -33,7 +33,7 @@ gradlePlugin {
     plugins {
         create("swiftpm") {
             id = "io.scade.gradle.plugins.android.swiftpm"
-            implementationClass = "com.scade.gradle.plugins.android.spm.SpmGradleAndroidPlugin"
+            implementationClass = "io.scade.gradle.plugins.android.spm.SpmGradleAndroidPlugin"
             displayName = "Swift Packages for Android-Gradle"
             description = "Adds seamless interoberability between Swift and Java/Kotlin into Android applications"
             tags = listOf("Swift", "SwiftPM", "SPM", "Java/Swift", "Kotlin/Swift", "Android", "SwiftForAndroid")

@@ -22,11 +22,15 @@ abstract class AssembleSwiftPackageTask() : SpmGradlePluginTask() {
     @Internal
     val assembleDebug: Property<Boolean> = project.objects.property(Boolean::class.java)
 
+    @Internal
+    val scdOptions: ListProperty<String> = project.objects.listProperty(String::class.java)
+
     @OutputDirectory
     val outputDirectory: DirectoryProperty = project.objects.directoryProperty()
 
     init {
         linkDependencies.convention(listOf())
+        scdOptions.convention(listOf())
         outputDirectory.set(project.layout.buildDirectory.dir("lib"))
     }
 
@@ -42,6 +46,7 @@ abstract class AssembleSwiftPackageTask() : SpmGradlePluginTask() {
             "--output", project.layout.buildDirectory.get(),
             "--product", product.get(),
             "--configuration", if (assembleDebug.get()) "Debug" else "Release",
+            *scdOptions.get().toTypedArray(),
             *linkArgs.toTypedArray(),
             *platformArgs().toTypedArray())
     }

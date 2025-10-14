@@ -54,7 +54,11 @@ swiftpm {
     // Platform configuration including custom toolchain path
     // Example: a custom path to the Android toolchain    
     platforms = listOf(
-        TargetPlatform.Android(file("<PATH TO THE TOOLCHAIN LOCATION>"))
+        TargetPlatform.Android(
+            // List of build architectures
+            archs = listOf("<armeabi-v7a | arm64-v8a | x86 | x86_64>"),
+            // Path to a custom toolchain location
+            toolchain = file("<PATH TO THE TOOLCHAIN LOCATION>"))
     )
     
     // Configuration for the Scade Build Tool (scd)
@@ -63,6 +67,8 @@ swiftpm {
     scd = file("<SCD BINARY LOCATION>")
     // Auto-update for the scd build tool
     scdAutoUpdate = true
+    // List of custom options passed to the scd build tool
+    scdOptions = listOf("<OPTIONS>")
 }
 ```
 
