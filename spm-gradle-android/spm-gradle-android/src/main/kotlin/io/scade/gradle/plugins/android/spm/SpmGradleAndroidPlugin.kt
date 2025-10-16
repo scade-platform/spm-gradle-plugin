@@ -90,11 +90,12 @@ class SpmGradleAndroidPlugin @Inject constructor (
                         })
                     }
 
-                    val outputJars = project.provider {
-                        task.get().outputDirectory.asFileTree.matching(PatternSet().include("*.jar"))
-                    }
 
-                    project.dependencies.add("${variant.name}Implementation", project.files(outputJars))
+//                    val outputJars = project.provider {
+//                        task.get().outputDirectory.asFileTree.matching(PatternSet().include("*.jar"))
+//                    }
+//
+//                    project.dependencies.add("${variant.name}Implementation", project.files(outputJars))
                 }
             }
         }
