@@ -58,7 +58,7 @@ abstract class GenerateBridgingTask() : SpmGradlePluginTask() {
                 "plugin", "generate-java-bridging",
                 "--product", product.get(),
                 "--java-version", javaVersion.getOrElse(11),
-                "--copy-java-sources",
+                //"--copy-java-sources",
                 *extraArguments.get().toTypedArray()
             )
         }
