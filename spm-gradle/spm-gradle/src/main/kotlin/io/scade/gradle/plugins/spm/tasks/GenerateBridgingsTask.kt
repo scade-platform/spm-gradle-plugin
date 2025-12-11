@@ -41,6 +41,7 @@ abstract class GenerateBridgingTask() : SpmGradlePluginTask() {
     private val pluginAvailable: Boolean
         get() {
             return swift("package",
+                "--disable-experimental-prebuilts",
                 "--scratch-path", buildDirPath,
                 "--package-path", packageDir,
                 "plugin", "--list"
