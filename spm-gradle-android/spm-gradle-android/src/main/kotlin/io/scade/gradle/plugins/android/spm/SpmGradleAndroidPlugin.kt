@@ -103,10 +103,6 @@ class SpmGradleAndroidPlugin @Inject constructor (
 
 
     override fun configureBridgingTask(project: Project, task: TaskProvider<GenerateBridgingTask>) {
-        // Set java version to 8 for Android compatibility if not set
-        if (!task.get().javaVersion.isPresent) {
-            task.get().javaVersion.set(8)
-        }
         task.get().extraArguments.add("--generate-android-view-models")
 
         project.plugins.withType(AppPlugin::class.java) {
@@ -120,6 +116,12 @@ class SpmGradleAndroidPlugin @Inject constructor (
 
                 task.get().bridgingJavaSrc.orNull?.let {
                     variant.sources.java?.addStaticSourceDirectory(it.asFile.path)
+                }
+
+                if (!task.get().javaVersion.isPresent) {
+                    if (variant.minSdk.apiLevel < 33) {
+                        task.get().javaVersion.set(8)
+                    }
                 }
             }
         }
