@@ -105,6 +105,9 @@ class SpmGradleAndroidPlugin @Inject constructor (
     override fun configureBridgingTask(project: Project, task: TaskProvider<GenerateBridgingTask>) {
         task.get().extraArguments.add("--generate-android-view-models")
 
+        // Disable copying as scd packs all sources into Jars while building a project
+        task.get().copyJavaSources.set(false)
+
         project.plugins.withType(AppPlugin::class.java) {
             val androidComponents =
                 project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)

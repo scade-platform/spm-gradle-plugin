@@ -17,6 +17,9 @@ abstract class GenerateBridgingTask() : SpmGradlePluginTask() {
     val javaVersion: Property<Int> = project.objects.property(Int::class.java)
 
     @Internal
+    val copyJavaSources: Property<Boolean> = project.objects.property(Boolean::class.java)
+
+    @Internal
     val extraArguments: ListProperty<String> = project.objects.listProperty(String::class.java)
 
     @OutputDirectory
@@ -26,6 +29,8 @@ abstract class GenerateBridgingTask() : SpmGradlePluginTask() {
     val bridgingJavaSrc: DirectoryProperty = project.objects.directoryProperty()
 
     init {
+        copyJavaSources.convention(true)
+
         bridgingSrc.set(
             product.map {
                 buildDir.get().dir("plugins/generate-java-bridging/outputs/$it/main")
@@ -53,15 +58,21 @@ abstract class GenerateBridgingTask() : SpmGradlePluginTask() {
     @TaskAction
     fun run() {
         if (pluginAvailable) {
-            swift("package",
+            val args = mutableListOf(
+                "package",
+                "--disable-experimental-prebuilts",
                 "--scratch-path", buildDirPath,
                 "--package-path", packageDir,
                 "plugin", "generate-java-bridging",
                 "--product", product.get(),
                 "--java-version", javaVersion.getOrElse(11),
-                //"--copy-java-sources",
-                *extraArguments.get().toTypedArray()
             )
+
+            if (copyJavaSources.get()) {
+                args.add("--copy-java-sources")
+            }
+
+            swift(*args.toTypedArray(), *extraArguments.get().toTypedArray())
         }
     }
 }
