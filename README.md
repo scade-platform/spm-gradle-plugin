@@ -74,6 +74,33 @@ swiftpm {
 
 **Note:** both plugins only support dynamic library products
 
+### Selecting Xcode
+
+Use `xcode` to build a project with a specific Xcode installation without
+changing the system-wide Xcode selection:
+
+```kotlin
+swiftpm {
+    xcode = file("/Applications/Xcode_26.6.app")
+}
+```
+
+This can help when a newer Xcode includes a Swift version that your Android
+toolchain does not yet support. Android builds also use the installed Swift
+toolchain on your Mac, so selecting a compatible Xcode can resolve the mismatch
+while other projects continue using the newer version.
+
+For a machine-specific selection, set the path in the Android project's ignored
+`local.properties` file instead:
+
+```properties
+swift.xcode=/Applications/Xcode_26.6.app
+```
+
+An explicit `swiftpm.xcode` value takes precedence over `swift.xcode`. If neither
+is set, the default Xcode selection is used. After changing the setting, sync
+Gradle in Android Studio and build normally.
+
 ## Development
 
 ### Local Installation
