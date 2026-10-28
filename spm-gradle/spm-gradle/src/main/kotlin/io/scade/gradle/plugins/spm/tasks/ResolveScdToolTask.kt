@@ -13,6 +13,10 @@ import java.net.URI
 import java.nio.file.Paths
 
 abstract class ResolveScdToolTask() : DefaultTask() {
+    @get:Optional
+    @get:Input
+    val xcodePath: Property<String> = project.objects.property(String::class.java)
+
     @Optional
     @InputFile
     val scd: RegularFileProperty = project.objects.fileProperty()
@@ -68,6 +72,7 @@ abstract class ResolveScdToolTask() : DefaultTask() {
             project.logger.lifecycle("Scade Build Tool is ready to use.")
             project.logger.lifecycle("Check and update Swift for Android toolchain ...")
             project.exec {
+                it.configureXcode(xcodePath.orNull)
                 it.commandLine(scdFile.asFile.get(), "toolchain", "install-latest")
             }
         }
@@ -114,6 +119,7 @@ abstract class ResolveScdToolTask() : DefaultTask() {
     private fun getInstalledVersion(scd:  java.io.File) : Triple<Int, Int, Int>? {
         val versionInfo = ByteArrayOutputStream().use { out ->
             project.exec {
+                it.configureXcode(xcodePath.orNull)
                 it.commandLine(scd.path, "--version")
                 it.standardOutput = out
             }

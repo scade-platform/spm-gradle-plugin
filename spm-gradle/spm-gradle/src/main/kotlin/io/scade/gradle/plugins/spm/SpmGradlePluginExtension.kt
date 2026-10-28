@@ -65,6 +65,7 @@ abstract class SpmGradlePluginExtension @Inject constructor(
     objects: ObjectFactory
 ) {
 
+    abstract val xcode: DirectoryProperty
     abstract val path: DirectoryProperty
     abstract val product: Property<String>
 

@@ -2,6 +2,9 @@ package io.scade.gradle.plugins.spm.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
@@ -12,6 +15,10 @@ import java.io.File
 
 
 abstract class SpmGradlePluginTask : DefaultTask() {
+    @get:Optional
+    @get:Input
+    val xcodePath: Property<String> = project.objects.property(String::class.java)
+
     @get:InputFile
     val scdFile: RegularFileProperty = project.objects.fileProperty()
 
@@ -42,12 +49,14 @@ abstract class SpmGradlePluginTask : DefaultTask() {
 
     fun scd(vararg args: Any): ExecResult {
         return project.exec {
+            it.configureXcode(xcodePath.orNull)
             it.commandLine(scdFile.asFile.get(), *args)
         }
     }
 
     fun swift(vararg args: Any): ExecResult {
         return project.exec {
+            it.configureXcode(xcodePath.orNull)
             it.commandLine("swift", *args)
         }
     }
@@ -55,6 +64,7 @@ abstract class SpmGradlePluginTask : DefaultTask() {
     fun<T> swift(vararg args: Any, captureOutput: (ExecResult, String) -> T): T {
         val stdout = ByteArrayOutputStream()
         val res = project.exec {
+            it.configureXcode(xcodePath.orNull)
             it.commandLine("swift", *args)
             it.standardOutput = stdout
         }

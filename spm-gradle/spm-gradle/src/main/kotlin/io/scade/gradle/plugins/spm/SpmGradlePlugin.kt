@@ -21,6 +21,7 @@ import org.gradle.internal.extensions.stdlib.capitalized
 
 import org.gradle.internal.os.OperatingSystem
 import javax.inject.Inject
+import java.util.Properties
 
 
 fun OperatingSystem.swiftTargetPlatform(): TargetPlatform? {
@@ -43,7 +44,17 @@ open class SpmGradlePlugin @Inject constructor (objects: ObjectFactory)
     override fun apply(project: Project) {
         val extension = project.extensions.create("swiftpm", SpmGradlePluginExtension::class.java)
 
+        val localPropertiesFile = project.rootProject.file("local.properties")
+        if (localPropertiesFile.isFile) {
+            val localProperties = Properties()
+            localPropertiesFile.inputStream().use { localProperties.load(it) }
+            localProperties.getProperty("swift.xcode")?.trim()?.takeIf { it.isNotEmpty() }?.let {
+                extension.xcode.convention(project.rootProject.layout.projectDirectory.dir(it))
+            }
+        }
+
         resolveScdTask = project.tasks.register("resolveScdTool", ResolveScdToolTask::class.java) {
+            it.xcodePath.set(extension.xcode.map { directory -> directory.asFile.absolutePath })
             it.scd.set(extension.scd)
             it.scdAutoUpdate.set(extension.scdAutoUpdate)
         }
@@ -88,6 +99,7 @@ open class SpmGradlePlugin @Inject constructor (objects: ObjectFactory)
                 it.scdFile.set(tp.flatMap { t -> t.scdFile })
             }
 
+            it.xcodePath.set(extension.xcode.map { directory -> directory.asFile.absolutePath })
             it.path.set(extension.path)
             it.product.set(extension.product)
             it.platforms.set(platforms)
@@ -131,6 +143,7 @@ open class SpmGradlePlugin @Inject constructor (objects: ObjectFactory)
                 it.scdFile.set(tp.flatMap { t -> t.scdFile })
             }
 
+            it.xcodePath.set(extension.xcode.map { directory -> directory.asFile.absolutePath })
             it.path.set(extension.path)
             it.product.set(extension.product)
             it.javaVersion.set(extension.javaVersion)
